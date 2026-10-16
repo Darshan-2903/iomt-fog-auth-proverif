@@ -76,7 +76,7 @@ Use the "Cite this repository" button on GitHub (from `CITATION.cff`), or:
 
 ```bibtex
 @misc{mahajan2026proverif,
-  author    = {Darshan Mahajan, Sujata Mohanty and Kare Jai Sai Chaitanya},
+  author    = {Darshan Mahajan and Sujata Mohanty and Kare Jai Sai Chaitanya},
   title     = {{ProVerif} model of a lightweight multifactor authentication protocol for fog-assisted {IoMT}},
   year      = {2026},
   publisher = {Zenodo},
