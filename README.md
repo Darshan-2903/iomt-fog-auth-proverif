@@ -1,15 +1,18 @@
-# ProVerif model: lightweight MFA for fog-assisted IoMT
+# ProVerif model: Sustainable Lightweight Multifactor Authentication for Secure Medical Data Exchange
 
-Formal model accompanying the paper *"Sustainable Lightweight Multifactor Authentication
-for Secure Medical Data Exchange"*.
-It checks the Login and Authentication phase (Table III of the paper) between a
-Patient device and a Fog Node under the Dolev-Yao attacker.
+Companion repository for the paper *"Sustainable Lightweight Multifactor
+Authentication for Secure Medical Data Exchange"* by Darshan Mahajan, Sujata Mohanty
+and Kare Jai Sai Chaitanya (NIT Rourkela).
+
+It contains the ProVerif model used in Section V-B of the paper. The model covers the
+login and authentication phase (Table III of the paper) between a user device `U_i` and
+the Fog Node `FN`, under the Dolev-Yao attacker, with unbounded sessions.
 
 ## Repository layout
 
 ```
 model/lightweight_mfa.pv        the ProVerif model (single file)
-results/proverif_output.txt     full ProVerif output of the run reported in the paper
+results/proverif_output.txt     full, unedited ProVerif output of the run reported in the paper
 CITATION.cff                    how to cite this repository
 LICENSE                         MIT
 ```
@@ -24,50 +27,57 @@ LICENSE                         MIT
 proverif model/lightweight_mfa.pv
 ```
 
-It finishes in a few seconds and should print the five `RESULT` lines below.
+It finishes in a few seconds and prints the verification summary shown in
+`results/proverif_output.txt`.
 
-## Queries and expected results
+## Queries and results (Table IV of the paper)
 
-| # | Query | Meaning | Result |
-|---|-------|---------|--------|
-| Q1 | `not attacker(secU)` | data the Patient sends under the session key SK stays secret | true |
-| Q2 | `not attacker(secF)` | data the Fog Node sends under SK stays secret | true |
-| Q3 | `not attacker(FNsk)` | Fog Node master key stays secret, even though the attacker is given the stolen Fog Node database (`TID`, `R_i`) and the device contents (`C_i`, `TID`) | true |
-| Q4 | `event(FNAcceptsUser(t,T,nu)) ==> event(UserStartsLogin(t,T,nu))` | Fog Node authenticates the Patient (non-injective agreement on `TID`, `T`, `nu`) | true |
-| Q5 | `inj-event(UserAcceptsFN(...)) ==> inj-event(FNSendsResponse(...))` | Patient authenticates the Fog Node, with injective agreement on all values including SK (mutual authentication and key agreement) | true |
+| Paper | Query in the model | Property | Result |
+|-------|--------------------|----------|--------|
+| Q1 | `not attacker(secU)` | A private value the user sends encrypted under `SK` stays secret | true |
+| Q2 | `not attacker(secF)` | A private value `FN` sends encrypted under `SK` stays secret | true |
+| Q3 | `not attacker(FNsk)` | `FN_sk` stays secret even when the attacker is given the stolen `FN` database (`TID_i`, `R_i`) and the device contents (`C_i`, `TID_i`) | true |
+| Q4 | `event(FNAcceptsUser(t,T,nu)) ==> event(UserStartsLogin(t,T,nu))` | `FN` accepts `(TID_i, T, n_u)` only if the user started that login (non-injective agreement) | true |
+| Q5 | `inj-event(UserAcceptsFN(t,T,nu,nf,Ts,SK)) ==> inj-event(FNSendsResponse(t,T,nu,nf,Ts,SK))` | The user accepts `(TID_i, T, n_u, n_f, T_s, SK)` only if `FN` sent it (injective agreement; together with Q4 this gives mutual authentication and key agreement) | true |
 
-The complete output is in `results/proverif_output.txt`.
+Secrecy of `SK` (Q1, Q2) is tested by having each party send a private value encrypted
+under `SK`, as described in the paper.
 
-## Modelling choices and limits
+## Modelling assumptions
 
-These simplifications are also stated in the header of the `.pv` file.
+These match the "Modeling assumptions" paragraph of Section V-B and the header of the
+`.pv` file.
 
-- **XOR masks** (`N1 = n_u xor h(S||T)` etc.) are modelled as keyed masks
-  (`mask` / `unmask`). Each mask key is a hash-derived one-time value, so this is
+- **XOR masks** (`N1 = n_u xor h(S||T)`, `N2 = n_f xor h(S||n_u||T_s)`) are modelled as keyed
+  masks (`mask` / `unmask`). Each mask key is a hash-derived one-time value, so this is
   equivalent for secrecy.
-- **Fuzzy extractor** is abstracted: `Rep` always returns the same private `sigma`.
-  The attacker never learns `sigma`, so compromise of both the device and the
-  biometric is **not** modelled.
-- **Pseudonym update** (`TID_new`) is not modelled: `TID` is fixed in the model.
-  The update value is a hash of values already in the session-key input, so it adds
-  no attacker knowledge, but **unlinkability and untraceability are not verified
-  by this model**.
-- **Replay protection**: the `DeltaT` window is abstracted (the attacker may supply
-  any timestamp) and the replay cache is a table. ProVerif cannot prove that a table
-  entry is absent, so the *injective* form of Q4 is not provable; Q4 is therefore
-  stated in its non-injective form. Replay resistance (`V1` cache + `DeltaT`) is argued
-  in the paper's informal analysis.
-- **Registration phase** is not modelled; its outputs (`C_i`, `TID`, `R_i`) are given
-  as initial state.
+- **Fuzzy extractor** is abstracted: `Rep` returns the same private `sigma_i` for the genuine
+  user. Biometric noise and helper-data leakage are not modelled, and the attacker never
+  learns `sigma_i`.
+- **Pseudonym update** (`TID_new`) is omitted and `TID_i` is fixed in the model. The update
+  value is a hash of inputs already used to derive `SK`, so it adds no attacker knowledge.
+- **Replay protection**: the window `DeltaT` is abstracted (the attacker may supply any
+  timestamp) and the `V1` replay cache is a table. ProVerif cannot prove that a table entry
+  is absent, so the injective form of Q4 cannot be proved. Q4 is therefore stated as
+  non-injective agreement, and replay rejection is argued in the informal analysis
+  (Section V-C).
+- **Registration phase** is not modelled. Its outputs (`C_i`, `TID_i`, `R_i`) are given as
+  initial state.
+
+## Scope
+
+The results are symbolic. Anonymity and unlinkability, offline guessing of `(ID_i, sigma_i)`
+and replay rejection within `DeltaT` are covered by the informal analysis in the paper, not
+by this model.
 
 ## Citation
 
-See `CITATION.cff` (GitHub shows a "Cite this repository" button) or:
+Use the "Cite this repository" button on GitHub (from `CITATION.cff`), or:
 
 ```bibtex
-@misc{proverif_model,
-  author    = {<Your Name> and <Co-authors>},
-  title     = {{ProVerif} model of a lightweight multi-factor authentication protocol for fog-assisted {IoMT}},
+@misc{mahajan2026proverif,
+  author    = {Mahajan, Darshan and Mohanty, Sujata and Chaitanya, Kare Jai Sai},
+  title     = {{ProVerif} model of a lightweight multifactor authentication protocol for fog-assisted {IoMT}},
   year      = {2026},
   publisher = {Zenodo},
   doi       = {10.5281/zenodo.<XXXXXXX>},

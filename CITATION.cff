@@ -1,15 +1,20 @@
 cff-version: 1.2.0
 message: "If you use this model, please cite it as below."
-title: "ProVerif model of a lightweight multi-factor authentication protocol for fog-assisted IoMT"
+title: "ProVerif model of a lightweight multifactor authentication protocol for fog-assisted IoMT"
 type: software
 authors:
-  - family-names: "<Family name>"
+  - family-names: "Mahajan"
     given-names: "Darshan"
     affiliation: "National Institute of Technology Rourkela"
-  # add co-authors here, same format
+  - family-names: "Mohanty"
+    given-names: "Sujata"
+    affiliation: "National Institute of Technology Rourkela"
+  - family-names: "Jai Sai Chaitanya"
+    given-names: "Kare"
+    affiliation: "National Institute of Technology Rourkela"
 date-released: "2026-10-16"
 version: "1.0.0"
 license: MIT
-repository-code: "https://github.com/<user>/iomt-fog-auth-proverif"
+repository-code: "https://github.com/Darshan-2903/iomt-fog-auth-proverif"
 # after the first Zenodo release, add:
 # doi: "10.5281/zenodo.<XXXXXXX>"
