@@ -76,12 +76,12 @@ Use the "Cite this repository" button on GitHub (from `CITATION.cff`), or:
 
 ```bibtex
 @misc{mahajan2026proverif,
-  author    = {Mahajan, Darshan and Mohanty, Sujata and Chaitanya, Kare Jai Sai},
+  author    = {Darshan Mahajan, Sujata Mohanty and Kare Jai Sai Chaitanya},
   title     = {{ProVerif} model of a lightweight multifactor authentication protocol for fog-assisted {IoMT}},
   year      = {2026},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.<XXXXXXX>},
-  url       = {https://github.com/<user>/iomt-fog-auth-proverif}
+  doi       = {10.5281/zenodo.23409247},
+  url       = {https://github.com/Darshan-2903/iomt-fog-auth-proverif}
 }
 ```
 

@@ -17,4 +17,4 @@ version: "1.0.0"
 license: MIT
 repository-code: "https://github.com/Darshan-2903/iomt-fog-auth-proverif"
 # after the first Zenodo release, add:
-# doi: "10.5281/zenodo.<XXXXXXX>"
+doi: "10.5281/zenodo.23409247"
