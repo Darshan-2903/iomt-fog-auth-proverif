@@ -1,0 +1,101 @@
+(* =====================================================================
+   Lightweight MFA for Fog-Assisted IoMT -- main model, tractable version
+   Verifies: Q1/Q2 session-key secrecy, Q3 FN-key secrecy (with stolen FN
+   database and device contents given to the attacker), Q4 (non-injective)
+   User->FN auth, Q5 injective FN->User auth (mutual auth + key agreement).
+   Simplifications (state them in the paper):
+   - XOR nonce masks modelled as keyed masks (senc/sdec) -- equivalent
+     for secrecy since each mask is a hash-derived one-time key.
+   - Fixed pseudonym TID within the model; the TID update value
+     h(S|nu|nf|"tid") is a hash of values already in SK's input set and
+     adds no attacker knowledge. Pseudonym unlinkability is argued
+     informally (or via a separate diff-equivalence model).
+   - Fuzzy extractor abstracted: Rep returns the same sigma (private name).
+   - DeltaT window abstracted (attacker may supply any T); in-window
+     replays are blocked by the V1 replay cache.
+   ===================================================================== *)
+
+free c: channel.
+free FNsk: bitstring [private].
+free secU: bitstring [private].
+free secF: bitstring [private].
+
+fun h(bitstring): bitstring.
+fun senc(bitstring, bitstring): bitstring.
+reduc forall m: bitstring, k: bitstring; sdec(senc(m, k), k) = m.
+fun mask(bitstring, bitstring): bitstring.
+reduc forall m: bitstring, k: bitstring; unmask(mask(m, k), k) = m.
+
+const fnlbl: bitstring.
+
+table seen(bitstring).                    (* FN replay cache *)
+
+event UserStartsLogin(bitstring, bitstring, bitstring).
+event FNAcceptsUser(bitstring, bitstring, bitstring).
+event FNSendsResponse(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring).
+event UserAcceptsFN(bitstring, bitstring, bitstring, bitstring, bitstring, bitstring).
+
+query attacker(secU).
+query attacker(secF).
+query attacker(FNsk).
+
+(* Q4: User -> FN authentication (agreement on TID, T, nu).  Non-injective:
+   ProVerif cannot prove absence of a table entry, so it over-approximates
+   the replay-cache 'else' branch and reports the injective form false
+   (an identical M1 replayed). Replay resistance (V1 cache + DeltaT) is
+   argued in the informal analysis. *)
+query t: bitstring, T: bitstring, nu: bitstring;
+  event(FNAcceptsUser(t, T, nu)) ==> event(UserStartsLogin(t, T, nu)).
+
+query t: bitstring, T: bitstring, nu: bitstring, nf: bitstring,
+      Ts: bitstring, SK: bitstring;
+  inj-event(UserAcceptsFN(t, T, nu, nf, Ts, SK))
+    ==> inj-event(FNSendsResponse(t, T, nu, nf, Ts, SK)).
+
+let Device(ID: bitstring, sigma: bitstring, C: bitstring, tid: bitstring) =
+  let A = h((ID, sigma)) in
+  let k = unmask(C, A) in
+  let S = h((A, k)) in
+  new nu: bitstring;
+  new T: bitstring;
+  let N1 = mask(nu, h((S, T))) in
+  let V1 = h((tid, nu, T, S)) in
+  event UserStartsLogin(tid, T, nu);
+  out(c, (tid, N1, V1, T));
+  in(c, (N2: bitstring, V2: bitstring, Ts: bitstring));
+  let nf = unmask(N2, h((S, nu, Ts))) in
+  let SK = h((S, nu, nf, T, Ts)) in
+  if V2 = h((SK, nu, Ts, fnlbl)) then
+  event UserAcceptsFN(tid, T, nu, nf, Ts, SK);
+  out(c, senc(secU, SK)).
+
+let FogNode(R: bitstring, tid: bitstring) =
+  in(c, (=tid, N1: bitstring, V1: bitstring, T: bitstring));
+  let S = sdec(R, FNsk) in
+  let nu = unmask(N1, h((S, T))) in
+  if V1 = h((tid, nu, T, S)) then
+  get seen(=V1) in 0 else (
+    insert seen(V1);
+    event FNAcceptsUser(tid, T, nu);
+    new nf: bitstring;
+    new Ts: bitstring;
+    let N2 = mask(nf, h((S, nu, Ts))) in
+    let SK = h((S, nu, nf, T, Ts)) in
+    let V2 = h((SK, nu, Ts, fnlbl)) in
+    event FNSendsResponse(tid, T, nu, nf, Ts, SK);
+    out(c, (N2, V2, Ts));
+    out(c, senc(secF, SK))
+  ).
+
+process
+  new ID: bitstring;
+  new sigma: bitstring;
+  new k: bitstring;
+  new tid: bitstring;
+  let A = h((ID, sigma)) in
+  let S = h((A, k)) in
+  let C = mask(k, A) in
+  let R = senc(S, FNsk) in
+  out(c, (C, tid));                       (* device contents, minus sigma *)
+  out(c, (tid, R));                       (* stolen FN database *)
+  ( !Device(ID, sigma, C, tid) | !FogNode(R, tid) )

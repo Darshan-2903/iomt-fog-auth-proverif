@@ -1,0 +1,53 @@
+-- Process 1-- Query not attacker(secU[]) in process 1
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(secU[])
+RESULT not attacker(secU[]) is true.
+-- Query not attacker(secF[]) in process 1
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(secF[])
+RESULT not attacker(secF[]) is true.
+-- Query not attacker(FNsk[]) in process 1
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(FNsk[])
+RESULT not attacker(FNsk[]) is true.
+-- Query event(FNAcceptsUser(t,T_2,nu_2)) ==> event(UserStartsLogin(t,T_2,nu_2)) in process 1
+Translating the process into Horn clauses...
+Completing...
+Starting query event(FNAcceptsUser(t,T_2,nu_2)) ==> event(UserStartsLogin(t,T_2,nu_2))
+goal reachable: b-event(UserStartsLogin(tid[],T_2,nu_2)) -> event(FNAcceptsUser(tid[],T_2,nu_2))
+Abbreviations:
+T_2 = T[!1 = @sid]
+nu_2 = nu[!1 = @sid]
+RESULT event(FNAcceptsUser(t,T_2,nu_2)) ==> event(UserStartsLogin(t,T_2,nu_2)) is true.
+-- Query inj-event(UserAcceptsFN(t,T_2,nu_2,nf_2,Ts_2,SK_2)) ==> inj-event(FNSendsResponse(t,T_2,nu_2,nf_2,Ts_2,SK_2)) in process 1
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(UserAcceptsFN(t,T_2,nu_2,nf_2,Ts_2,SK_2)) ==> inj-event(FNSendsResponse(t,T_2,nu_2,nf_2,Ts_2,SK_2))
+goal reachable: b-inj-event(FNSendsResponse(tid[],T_2,nu_2,nf_2,Ts_2,h((h((h((ID[],sigma[])),k[])),nu_2,nf_2,T_2,Ts_2))),@occ44_1) -> inj-event(UserAcceptsFN(tid[],T_2,nu_2,nf_2,Ts_2,h((h((h((ID[],sigma[])),k[])),nu_2,nf_2,T_2,Ts_2))),@occ28_1)
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+T_2 = T[!1 = @sid]
+nu_2 = nu[!1 = @sid]
+nf_2 = nf_1[T_1 = T_2,V1_1 = h((tid[],nu_2,T_2,h((h((ID[],sigma[])),k[])))),N1_1 = mask(nu_2,h((h((h((ID[],sigma[])),k[])),T_2))),!1 = @sid_1]
+Ts_2 = Ts_1[T_1 = T_2,V1_1 = h((tid[],nu_2,T_2,h((h((ID[],sigma[])),k[])))),N1_1 = mask(nu_2,h((h((h((ID[],sigma[])),k[])),T_2))),!1 = @sid_1]
+@occ28_1 = @occ28[Ts = Ts_2,V2 = h((h((h((h((ID[],sigma[])),k[])),nu_2,nf_2,T_2,Ts_2)),nu_2,Ts_2,fnlbl)),N2 = mask(nf_2,h((h((h((ID[],sigma[])),k[])),nu_2,Ts_2))),!1 = @sid]
+@occ44_1 = @occ44[T_1 = T_2,V1_1 = h((tid[],nu_2,T_2,h((h((ID[],sigma[])),k[])))),N1_1 = mask(nu_2,h((h((h((ID[],sigma[])),k[])),T_2))),!1 = @sid_1]
+RESULT inj-event(UserAcceptsFN(t,T_2,nu_2,nf_2,Ts_2,SK_2)) ==> inj-event(FNSendsResponse(t,T_2,nu_2,nf_2,Ts_2,SK_2)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(secU[]) is true.
+
+Query not attacker(secF[]) is true.
+
+Query not attacker(FNsk[]) is true.
+
+Query event(FNAcceptsUser(t,T_2,nu_2)) ==> event(UserStartsLogin(t,T_2,nu_2)) is true.
+
+Query inj-event(UserAcceptsFN(t,T_2,nu_2,nf_2,Ts_2,SK_2)) ==> inj-event(FNSendsResponse(t,T_2,nu_2,nf_2,Ts_2,SK_2)) is true.
+
+--------------------------------------------------------------
